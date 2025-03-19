@@ -1,0 +1,7 @@
+name : 'transformer'
+max_len : 100
+n_layers : 3
+d_model : 256
+d_ff : 512
+n_heads : 8
+drop_p : 0.1

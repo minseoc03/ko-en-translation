@@ -1,0 +1,6 @@
+name : ai_hub_conversation_100K
+data_path : "../../data/대화체.xlsx"
+batch_size : 64
+train_size : 97000
+val_size : 2000
+test_size : 1000

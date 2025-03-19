@@ -1,0 +1,24 @@
+pre_trained_use : true
+
+scheduler_name : "Noam"
+
+schedulers :
+  - name : "Noam"
+    warmup_steps : 1000
+    LR_scale : 0.5
+  - name : "Cos"
+    LR_init : 5e-4
+    T0 : 1500
+    T_mult : 2
+
+optimizers :
+  - name : "Adam"
+    lr : 0
+    betas : [0.9, 0.98]
+    eps : 1e-9
+    weight_decay : 0
+
+criterion:
+  _target_: torch.nn.CrossEntropyLoss
+
+epoch : 15

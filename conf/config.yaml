@@ -1,0 +1,8 @@
+defaults:
+  - model : transformer
+  - dataset : ai_hub_conversation_100K
+  - trainer : default
+
+seed : 42
+pre_trained_use : true
+tokenizer : 'Helsinki-NLP/opus-mt-ko-en'

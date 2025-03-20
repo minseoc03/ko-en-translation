@@ -117,7 +117,7 @@ python main.py inference.translation.src_text="안녕하세요" model.transforme
 
 ## License
 
-[Add your license information here]
+This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgements
 

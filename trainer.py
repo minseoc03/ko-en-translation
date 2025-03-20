@@ -1,14 +1,21 @@
-def Train(model, train_DL, val_DL, epoch, batch_size, criterion, optimizer, scheduler = None):
+import torch
+import math
+from tqdm import tqdm
+
+
+def Train(model, train_DL, val_DL, epoch, batch_size, max_len,
+          criterion, optimizer, tokenizer, DEVICE, 
+          save_history_path, save_model_path, scheduler = None):
     loss_history = {'train': [], 'val': []}
-    best_loss = 9999
+    best_loss = float('inf')
     for ep in range(epoch):
         model.train()
-        train_loss = loss_epoch(model, train_DL, criterion, optimizer = optimizer, scheduler = scheduler)
+        train_loss = loss_epoch(model, train_DL, criterion, tokenizer, max_len, DEVICE, optimizer = optimizer, scheduler = scheduler)
         loss_history['train'] += [train_loss]
 
         model.eval()
         with torch.no_grad():
-            val_loss = loss_epoch(model, val_DL, criterion)
+            val_loss = loss_epoch(model, val_DL, criterion, tokenizer, max_len, DEVICE)
             loss_history['val'] += [val_loss]
             if val_loss < best_loss:
                 best_loss = val_loss
@@ -23,13 +30,13 @@ def Train(model, train_DL, val_DL, epoch, batch_size, criterion, optimizer, sche
                'EPOCH' : epoch,
                'BATCH_SIZE' : batch_size}, save_history_path)
 
-def Test(model, test_DL, criterion):
+def Test(model, test_DL, criterion, tokenizer, max_len, DEVICE):
     model.eval()
     with torch.no_grad():
-        test_loss = loss_epoch(model, test_DL, criterion)
+        test_loss = loss_epoch(model, test_DL, criterion, tokenizer, max_len, DEVICE)
     print(f'Test Loss : {test_loss:.3f} | Test PPL : {math.exp(test_loss):.3f}')
 
-def loss_epoch(model, DL, criterion, optimizer = None, scheduler = None):
+def loss_epoch(model, DL, criterion, tokenizer, max_len, DEVICE, optimizer = None, scheduler = None):
     N = len(DL.dataset)
 
     rloss = 0

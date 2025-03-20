@@ -1,3 +1,10 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from einops import rearrange
+from tqdm import tqdm
+from omegaconf import DictConfig
+
 class MHA(nn.Module):
     def __init__(self, d_model, n_heads):
         super().__init__()
@@ -71,24 +78,25 @@ class EncoderLayer(nn.Module):
         return x, atten_enc
 
 class Encoder(nn.Module):
-    def __init__(self, input_embedding, max_len, n_layers, d_model, d_ff, n_heads, drop_p):
+    def __init__(self, input_embedding, DEVICE, max_len, n_layers, d_model, d_ff, n_heads, drop_p):
         super().__init__()
 
         self.scale = torch.sqrt(torch.tensor(d_model))
         self.input_embedding = input_embedding
         self.pos_embedding = nn.Embedding(max_len, d_model)
+        self.DEVICE = DEVICE
 
         self.dropout = nn.Dropout(drop_p)
 
         self.layers = nn.ModuleList([EncoderLayer(d_model, d_ff, n_heads, drop_p) for _ in range(n_layers)])
 
     def forward(self, src, mask, atten_map_save = False):
-        pos = torch.arange(src.shape[1]).expand_as(src).to(DEVICE)
+        pos = torch.arange(src.shape[1]).expand_as(src).to(self.DEVICE)
 
         x = self.scale * self.input_embedding(src) + self.pos_embedding(pos)
         x = self.dropout(x)
 
-        atten_encs = torch.tensor([]).to(DEVICE)
+        atten_encs = torch.tensor([]).to(self.DEVICE)
         for layer in self.layers:
             x, atten_enc = layer(x, mask)
             if atten_map_save is True:
@@ -127,12 +135,13 @@ class DecoderLayer(nn.Module):
         return x, atten_dec, atten_enc_dec
 
 class Decoder(nn.Module):
-    def __init__(self, input_embedding, max_len, n_layers, d_model, d_ff, n_heads, drop_p):
+    def __init__(self, input_embedding, vocab_size, DEVICE, max_len, n_layers, d_model, d_ff, n_heads, drop_p):
         super().__init__()
 
         self.scale = torch.sqrt(torch.tensor(d_model))
         self.input_embedding = input_embedding
         self.pos_embedding = nn.Embedding(max_len, d_model)
+        self.DEVICE = DEVICE
 
         self.dropout = nn.Dropout(drop_p)
 
@@ -141,13 +150,13 @@ class Decoder(nn.Module):
         self.fc_out = nn.Linear(d_model, vocab_size)
 
     def forward(self, trg, enc_out, dec_mask, enc_dec_mask, atten_map_save = False):
-        pos = torch.arange(trg.shape[1]).expand_as(trg).to(DEVICE)
+        pos = torch.arange(trg.shape[1]).expand_as(trg).to(self.DEVICE)
 
         x = self.scale * self.input_embedding(trg) + self.pos_embedding(pos)
         x = self.dropout(x)
 
-        atten_decs = torch.tensor([]).to(DEVICE)
-        atten_enc_decs = torch.tensor([]).to(DEVICE)
+        atten_decs = torch.tensor([]).to(self.DEVICE)
+        atten_enc_decs = torch.tensor([]).to(self.DEVICE)
         for layer in self.layers:
             x, atten_dec, atten_enc_dec = layer(x, enc_out, dec_mask, enc_dec_mask)
             if atten_map_save is True:
@@ -159,37 +168,39 @@ class Decoder(nn.Module):
         return x, atten_decs, atten_enc_decs
 
 class Transformer(nn.Module):
-    def __init__(self, vocab_size : int, cfg : DictConfig):
+    def __init__(self, vocab_size : int, pad_idx : int, DEVICE, cfg : DictConfig):
         super().__init__()
 
         self.input_embedding = nn.Embedding(vocab_size, cfg.d_model)
-        self.encoder = Encoder(self.input_embedding, cfg.max_len, cfg.n_layers, cfg.d_model, cfg.d_ff, cfg.n_heads, cfg.drop_p)
-        self.decoder = Decoder(self.input_embedding, cfg.max_len, cfg.n_layers, cfg.d_model, cfg.d_ff, cfg.n_heads, cfg.drop_p)
+        self.encoder = Encoder(self.input_embedding, DEVICE, cfg.max_len, cfg.n_layers, cfg.d_model, cfg.d_ff, cfg.n_heads, cfg.drop_p)
+        self.decoder = Decoder(self.input_embedding, vocab_size, DEVICE, cfg.max_len, cfg.n_layers, cfg.d_model, cfg.d_ff, cfg.n_heads, cfg.drop_p)
 
         self.n_heads = cfg.n_heads
+        self.pad_idx = pad_idx
+        self.DEVICE = DEVICE
 
         for m in self.modules():
             if hasattr(m, 'weight') and m.weight.dim() > 1:
                 nn.init.xavier_uniform_(m.weight)
 
     def make_enc_mask(self, src):
-        enc_mask = (src == pad_idx).unsqueeze(1).unsqueeze(2)
+        enc_mask = (src == self.pad_idx).unsqueeze(1).unsqueeze(2)
         enc_mask = enc_mask.expand(src.shape[0], self.n_heads, src.shape[1], src.shape[1])
 
         return enc_mask
 
     def make_dec_mask(self, trg):
-        trg_pad_mask = (trg == pad_idx).unsqueeze(1).unsqueeze(2)
+        trg_pad_mask = (trg == self.pad_idx).unsqueeze(1).unsqueeze(2)
         trg_pad_mask = trg_pad_mask.expand(trg.shape[0], self.n_heads, trg.shape[1], trg.shape[1])
 
         trg_future_mask = torch.tril(torch.ones(trg.shape[0], self.n_heads, trg.shape[1], trg.shape[1]))==0
-        trg_future_mask = trg_future_mask.to(DEVICE)
+        trg_future_mask = trg_future_mask.to(self.DEVICE)
 
         dec_mask = trg_pad_mask | trg_future_mask
         return dec_mask
 
     def make_enc_dec_mask(self, src, trg):
-        enc_dec_mask = (src == pad_idx).unsqueeze(1).unsqueeze(2)
+        enc_dec_mask = (src == self.pad_idx).unsqueeze(1).unsqueeze(2)
         enc_dec_mask = enc_dec_mask.expand(trg.shape[0], self.n_heads, trg.shape[1], src.shape[1])
         return enc_dec_mask
 

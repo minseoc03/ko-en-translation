@@ -1,4 +1,9 @@
-def translation(model, src_text, atten_map_save = False):
+import torch
+from torch import n
+from torch.nn import functional as F
+from einops import rearrange
+
+def translation(model, src_text, tokenizer, max_len, DEVICE, atten_map_save = False):
     model.eval()
     with torch.no_grad():
         src = tokenizer.encode(src_text, return_tensors='pt', add_special_tokens=False).to(DEVICE)

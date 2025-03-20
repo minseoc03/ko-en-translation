@@ -1,6 +1,8 @@
 import pandas as pd
 import torch
-import numpy
+import numpy as np
+from torch.utils.data import Dataset, DataLoader, random_split
+from omegaconf import DictConfig
 
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, data):
@@ -20,3 +22,5 @@ def get_dataloader(cfg: DictConfig):
     train_DL = torch.utils.data.DataLoader(train_DS, batch_size = cfg.batch_size, shuffle = True)
     val_DL = torch.utils.data.DataLoader(val_DS, batch_size = cfg.batch_size, shuffle = True)
     test_DL = torch.utils.data.DataLoader(test_DS, batch_size = cfg.batch_size, shuffle = True)
+
+    return train_DL, val_DL, test_DL

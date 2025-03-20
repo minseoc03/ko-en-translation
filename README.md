@@ -106,7 +106,7 @@ python main.py inference.translation.src_text="저는 한국어를 공부하고 
 
 Change model parameters:
 ```bash
-python main.py inference.translation.src_text="안녕하세요" model.beam_size=5
+python main.py inference.translation.src_text="안녕하세요" model.transformer.n_layers=6 trainer.default.epoch=100
 ```
 
 ## Model Details
@@ -121,6 +121,5 @@ python main.py inference.translation.src_text="안녕하세요" model.beam_size=
 
 ## Acknowledgements
 
-- AI-HUB for providing the training data
-- Helsinki-NLP for the tokenizer model
-- Hydra for configuration management
+- Dataset : [AI-HUB Korean-English Conversation Dataset](https://aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&aihubDataSe=realm&dataSetSn=126)
+- Tokenizer : [HuggingFace Helsinki-NLP/opus-mt-ko-en](https://huggingface.co/Helsinki-NLP/opus-mt-ko-en)

@@ -57,7 +57,13 @@ python main.py
 ```
 
 ### ⚙️ Configuration with Hydra  
-Modify configuration parameters in `conf/inference/translation.yaml` or override them from the command line:  
+This project uses **Hydra** for flexible and easy configuration management. You can modify configuration parameters either by **editing the YAML files** or by **overriding them directly from the command line.**
+#### 🔹 Method 1: Edit the configuration file
+Modify the `src_text` parameter in:
+```bash
+conf/inference/translation.yaml
+```
+#### 🔹 Method 2: Override from the command line
 ```bash
 python main.py inference.translation.src_text="안녕하세요. 어떻게 지내세요?"
 ```
@@ -71,14 +77,39 @@ Transformer_history.pt
 
 ## 📖 Examples  
 #### ✅ Basic example  
-Modify `src_text` in `conf/inference/translation.yaml`, then run:  
+1️⃣ Open the translation configuration file:
+```bash
+nano conf/inference/translation.yaml
+```
+2️⃣ Change the src_text field:
+```yaml
+# Original
+src_text: "안녕하세요. 만나서 반갑습니다."
+
+# Modified
+src_text: "오늘 날씨가 정말 좋네요. 산책하러 갈까요?"
+```
+3️⃣ Run the translation:
 ```bash
 python main.py
 ```
-Command line override examples:  
+4️⃣ The output will show:
+```text
+Korean: 오늘 날씨가 정말 좋네요. 산책하러 갈까요?
+English: The weather is really nice today. Shall we go for a walk?
+```
+#### 🔹 Command line override examples
+Translate a simple greeting:
 ```bash
 python main.py inference.translation.src_text="안녕하세요. 반갑습니다."
-python main.py inference.translation.src_text="저는 한국어를 공부하고 있습니다."
+```
+Translate a longer sentence:
+```bash
+python main.py inference.translation.src_text="저는 한국어를 공부하고 있습니다. 이 번역기가 도움이 될 것 같아요."
+```
+Change model parameters:
+```bash
+python main.py inference.translation.src_text="안녕하세요" model.transformer.n_layers=6 trainer.default.epoch=100
 ```
 
 ## 🏗️ Model Details  

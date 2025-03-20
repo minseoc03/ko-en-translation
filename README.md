@@ -14,6 +14,31 @@ This project implements a neural machine translation (NMT) system using the Tran
 - Simple inference interface
 - Achieved **29.9** BLEU Score
 
+## Repository Directory
+```bash
+ko-en-translation/
+│── main.py
+│── dataset.py
+│── transformer.py
+│── trainer.py
+│── translation.py
+│── requirements.txt
+│── LICENSE
+│── README.md
+│── conf/
+│   ├── config.yaml
+│   ├── model/
+│   │   ├── transformer.yaml
+│   ├── dataset/
+│   │   ├── ai_hub_conversation_100K.yaml
+│   ├── inference/
+│   │   ├── translation.yaml
+│   ├── trainer/
+│   │   ├── default.yaml
+│── data/
+│   ├── 대화체.xlsx
+```
+
 ## Installation
 
 Clone the repository:

@@ -10,9 +10,9 @@ This project implements a neural machine translation (NMT) system using the Tran
 
 - Transformer-based architecture for high-quality translations
 - Trained on conversational data for more natural translations
-- Helsinki-opus-ko-en tokenizer implementation
 - Easy configuration through YAML files using Hydra
 - Simple inference interface
+- Achieved **29.9** BLEU Score
 
 ## Installation
 
@@ -57,6 +57,13 @@ You can override configuration parameters directly from the command line:
 
 ```bash
 python main.py inference.translation.src_text="안녕하세요. 어떻게 지내세요?"
+```
+
+### Pre-trained Model
+If you want to use a pretrained model, create a pretrained/ folder in the root directory and place the following files inside:
+```
+Transformer.pt
+Transformer_history.pt
 ```
 
 ### Examples

@@ -95,8 +95,8 @@ python main.py
 ```
 4️⃣ The output will show:
 ```text
-Korean: 오늘 날씨가 정말 좋네요. 산책하러 갈까요?
-English: The weather is really nice today. Shall we go for a walk?
+입력 : 오늘 날씨가 정말 좋네요. 산책하러 갈까요?
+번역 : The weather is really nice today. Shall we go for a walk?
 ```
 #### 🔹 Command line override examples
 Translate a simple greeting:
